@@ -221,13 +221,63 @@ footer a:hover {
 }
 
 /* Mobile Tweaks */
-@media (max-width: 400px) {
+@media (max-height: 700px) {
     .app-container {
+        gap: 12px;
         padding: 10px;
     }
+    header h1 {
+        font-size: 1.4rem;
+    }
+    .visualizer-container {
+        height: 80px;
+        margin-bottom: 12px;
+    }
+    #waveformCanvas, #spectrumCanvas {
+        height: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        align-items: flex-start;
+        padding-top: 10px;
+    }
     
+    .app-container {
+        max-width: 100%;
+        height: calc(100vh - 20px);
+        justify-content: space-between;
+    }
+
+    .card {
+        padding: 15px;
+    }
+
     .key {
         font-size: 1.2rem;
         border-radius: 12px;
+    }
+
+    .dialpad-grid {
+        gap: 8px;
+    }
+}
+
+@media (max-height: 600px) {
+    .subtitle {
+        display: none;
+    }
+    .visualizer-container {
+        height: 60px;
+    }
+    #waveformCanvas, #spectrumCanvas {
+        height: 30px;
+    }
+    .dialpad-grid {
+        gap: 6px;
+    }
+    .key {
+        font-size: 1.1rem;
     }
 }
