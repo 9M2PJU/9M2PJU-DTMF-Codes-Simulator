@@ -20,10 +20,21 @@ class DTMFSymbol {
         this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         this.analyser = this.audioCtx.createAnalyser();
         this.analyser.fftSize = 2048;
+
+        // Simulate telephone bandpass characteristics (approx 300Hz - 3400Hz)
+        this.filter = this.audioCtx.createBiquadFilter();
+        this.filter.type = 'bandpass';
+        this.filter.frequency.value = 1850; // Midpoint
+        this.filter.Q.value = 0.5; // Wide enough for DTMF range
+
         this.gainNode = this.audioCtx.createGain();
         this.gainNode.gain.value = 0;
-        this.gainNode.connect(this.analyser);
+
+        // Signal Chain: Oscillators -> Gain -> Filter -> Analyser -> Output
+        this.gainNode.connect(this.filter);
+        this.filter.connect(this.analyser);
         this.analyser.connect(this.audioCtx.destination);
+        
         this.initialized = true;
     }
 
@@ -36,7 +47,10 @@ class DTMFSymbol {
         const freqs = DTMF_MAP[key];
         if (!freqs) return;
 
-        this.stopTone();
+        // If a tone is already playing, stop it immediately without long ramp
+        if (this.osc1 || this.osc2) {
+            this.stopTone(true);
+        }
 
         this.osc1 = this.audioCtx.createOscillator();
         this.osc2 = this.audioCtx.createOscillator();
@@ -44,15 +58,18 @@ class DTMFSymbol {
         this.osc1.type = 'sine';
         this.osc2.type = 'sine';
 
-        this.osc1.frequency.setValueAtTime(freqs[0], this.audioCtx.currentTime);
-        this.osc2.frequency.setValueAtTime(freqs[1], this.audioCtx.currentTime);
+        const now = this.audioCtx.currentTime;
+
+        this.osc1.frequency.setValueAtTime(freqs[0], now);
+        this.osc2.frequency.setValueAtTime(freqs[1], now);
 
         this.osc1.connect(this.gainNode);
         this.osc2.connect(this.gainNode);
 
-        this.gainNode.gain.cancelScheduledValues(this.audioCtx.currentTime);
-        this.gainNode.gain.setValueAtTime(0, this.audioCtx.currentTime);
-        this.gainNode.gain.linearRampToValueAtTime(0.1, this.audioCtx.currentTime + 0.01);
+        // Smooth Attack to prevent clicking
+        this.gainNode.gain.cancelScheduledValues(now);
+        this.gainNode.gain.setValueAtTime(0, now);
+        this.gainNode.gain.exponentialRampToValueAtTime(0.2, now + 0.02);
 
         this.osc1.start();
         this.osc2.start();
@@ -64,19 +81,25 @@ class DTMFSymbol {
         }
     }
 
-    stopTone() {
-        if (!this.initialized) return;
+    stopTone(immediate = false) {
+        if (!this.initialized || (!this.osc1 && !this.osc2)) return;
         
-        this.gainNode.gain.cancelScheduledValues(this.audioCtx.currentTime);
-        this.gainNode.gain.linearRampToValueAtTime(0, this.audioCtx.currentTime + 0.05);
+        const now = this.audioCtx.currentTime;
+        const rampTime = immediate ? 0.005 : 0.05;
         
+        this.gainNode.gain.cancelScheduledValues(now);
+        this.gainNode.gain.exponentialRampToValueAtTime(0.0001, now + rampTime);
+        
+        const o1 = this.osc1;
+        const o2 = this.osc2;
+        this.osc1 = null;
+        this.osc2 = null;
+
         setTimeout(() => {
-            if (this.osc1) { this.osc1.stop(); this.osc1.disconnect(); }
-            if (this.osc2) { this.osc2.stop(); this.osc2.disconnect(); }
-            this.osc1 = null;
-            this.osc2 = null;
-            updateFrequencyDisplay(null, null);
-        }, 50);
+            if (o1) { try { o1.stop(); o1.disconnect(); } catch(e) {} }
+            if (o2) { try { o2.stop(); o2.disconnect(); } catch(e) {} }
+            if (!this.osc1) updateFrequencyDisplay(null, null);
+        }, rampTime * 1000 + 10);
     }
 }
 
