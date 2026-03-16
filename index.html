@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9M2PJU | DTMF Code Simulator</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>DTMF SIMULATOR</h1>
+            <p class="subtitle">9M2PJU Advanced Radio Toolkit</p>
+        </header>
+
+        <main>
+            <section class="display-section card">
+                <div class="visualizer-container">
+                    <canvas id="waveformCanvas"></canvas>
+                    <canvas id="spectrumCanvas"></canvas>
+                </div>
+                <div class="input-display">
+                    <input type="text" id="dtmfInput" placeholder="Enter codes (e.g. 1234#)" autocomplete="off">
+                    <div class="controls">
+                        <button id="playBtn" class="btn btn-primary" title="Play Sequence">▶</button>
+                        <button id="clearBtn" class="btn btn-secondary" title="Clear Input">✕</button>
+                    </div>
+                </div>
+                <div class="frequency-indicator">
+                    <span id="lowFreq">--- Hz</span>
+                    <span id="highFreq">--- Hz</span>
+                </div>
+            </section>
+
+            <section class="dialpad-section">
+                <div class="dialpad-grid">
+                    <button class="key" data-key="1">1</button>
+                    <button class="key" data-key="2">2</button>
+                    <button class="key" data-key="3">3</button>
+                    <button class="key accent" data-key="A">A</button>
+
+                    <button class="key" data-key="4">4</button>
+                    <button class="key" data-key="5">5</button>
+                    <button class="key" data-key="6">6</button>
+                    <button class="key accent" data-key="B">B</button>
+
+                    <button class="key" data-key="7">7</button>
+                    <button class="key" data-key="8">8</button>
+                    <button class="key" data-key="9">9</button>
+                    <button class="key accent" data-key="C">C</button>
+
+                    <button class="key" data-key="*">*</button>
+                    <button class="key" data-key="0">0</button>
+                    <button class="key" data-key="#">#</button>
+                    <button class="key accent" data-key="D">D</button>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 9M2PJU | Digital Laboratory</p>
+        </footer>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
